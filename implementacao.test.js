@@ -330,6 +330,227 @@ test("CT-006 - Exclusão de cliente existente", async () => {
             expect(response.body).toBeDefined();
         });
 
+    // CT-014 ATÉ CT-038
+    // =========================================================
+
+    describe("Suíte de Testes - Validações dos Modelos", () => {
+
+        const clienteValido = {
+            nome: "Cliente de Teste",
+            cpf: "12345678909",
+            cep: "13010000",
+            logradouro: "Rua Central",
+            bairro: "Centro",
+            cidade: "Campinas",
+            uf: "SP",
+            numero: "100",
+            complemento: "Casa"
+        };
+
+        // CT-014
+        test("CT-014 - Cadastro de cliente com CPF vazio", () => {
+            expect(() => new Cliente(
+                clienteValido.nome, "", clienteValido.cep,
+                clienteValido.logradouro, clienteValido.bairro,
+                clienteValido.cidade, clienteValido.uf,
+                clienteValido.numero
+            )).toThrow("CPF inválido");
+        });
+
+        // CT-015
+        test("CT-015 - Cadastro de cliente com CEP curto", () => {
+            expect(() => new Cliente(
+                clienteValido.nome, clienteValido.cpf, "1234567",
+                clienteValido.logradouro, clienteValido.bairro,
+                clienteValido.cidade, clienteValido.uf,
+                clienteValido.numero
+            )).toThrow("CEP inválido");
+        });
+
+        // CT-016
+        test("CT-016 - Cadastro de cliente com CEP longo", () => {
+            expect(() => new Cliente(
+                clienteValido.nome, clienteValido.cpf, "123456789",
+                clienteValido.logradouro, clienteValido.bairro,
+                clienteValido.cidade, clienteValido.uf,
+                clienteValido.numero
+            )).toThrow("CEP inválido");
+        });
+
+        // CT-017
+        test("CT-017 - Cadastro de cliente com UF inválida", () => {
+            expect(() => new Cliente(
+                clienteValido.nome, clienteValido.cpf, clienteValido.cep,
+                clienteValido.logradouro, clienteValido.bairro,
+                clienteValido.cidade, "SPO",
+                clienteValido.numero
+            )).toThrow("UF inválida");
+        });
+
+        // CT-018
+        test("CT-018 - Cadastro de cliente sem logradouro", () => {
+            expect(() => new Cliente(
+                clienteValido.nome, clienteValido.cpf, clienteValido.cep,
+                "", clienteValido.bairro, clienteValido.cidade,
+                clienteValido.uf, clienteValido.numero
+            )).toThrow("Logradouro inválido");
+        });
+
+        // CT-019
+        test("CT-019 - Cadastro de cliente sem bairro", () => {
+            expect(() => new Cliente(
+                clienteValido.nome, clienteValido.cpf, clienteValido.cep,
+                clienteValido.logradouro, "", clienteValido.cidade,
+                clienteValido.uf, clienteValido.numero
+            )).toThrow("Bairro inválido");
+        });
+
+        // CT-020
+        test("CT-020 - Cadastro de cliente sem cidade", () => {
+            expect(() => new Cliente(
+                clienteValido.nome, clienteValido.cpf, clienteValido.cep,
+                clienteValido.logradouro, clienteValido.bairro, "",
+                clienteValido.uf, clienteValido.numero
+            )).toThrow("Cidade inválida");
+        });
+
+        // CT-021
+        test("CT-021 - Cadastro de cliente sem número", () => {
+            expect(() => new Cliente(
+                clienteValido.nome, clienteValido.cpf, clienteValido.cep,
+                clienteValido.logradouro, clienteValido.bairro,
+                clienteValido.cidade, clienteValido.uf, ""
+            )).toThrow("Número inválido");
+        });
+
+        // CT-022
+        test("CT-022 - Cadastro de cliente com nome acima do limite", () => {
+            expect(() => new Cliente(
+                "C".repeat(101), clienteValido.cpf, clienteValido.cep,
+                clienteValido.logradouro, clienteValido.bairro,
+                clienteValido.cidade, clienteValido.uf,
+                clienteValido.numero
+            )).toThrow("Nome inválido");
+        });
+
+        // CT-023
+        test("CT-023 - Edição de cliente com ID zero", () => {
+            expect(() => Cliente.editar({
+                ...clienteValido
+            }, 0)).not.toThrow();
+        });
+
+        // CT-024
+        test("CT-024 - Cadastro de montadora com país vazio", () => {
+            expect(() => new Montadora("Toyota", ""))
+                .toThrow("País inválido");
+        });
+
+        // CT-025
+        test("CT-025 - Cadastro de montadora com país de um caractere", () => {
+            expect(() => new Montadora("Toyota", "J"))
+                .toThrow("País inválido");
+        });
+
+        // CT-026
+        test("CT-026 - Cadastro de montadora com país acima do limite", () => {
+            expect(() => new Montadora("Toyota", "P".repeat(46)))
+                .toThrow("País inválido");
+        });
+
+        // CT-027
+        test("CT-027 - Cadastro de montadora com nome acima do limite", () => {
+            expect(() => new Montadora("M".repeat(61), "Brasil"))
+                .toThrow("Nome inválido");
+        });
+
+        // CT-028
+        test("CT-028 - Edição de montadora com ID negativo", () => {
+            expect(() => Montadora.editar({
+                nome: "Honda",
+                pais: "Japão"
+            }, -1)).toThrow("ID inválido");
+        });
+
+        // CT-029
+        test("CT-029 - Cadastro de veículo sem ID da montadora", () => {
+            expect(() => new Veiculo(
+                null, 1, "Civic", "ABC1234",
+                2024, "Preto", 85000
+            )).toThrow("ID da montadora inválido");
+        });
+
+        // CT-030
+        test("CT-030 - Cadastro de veículo sem ID do cliente", () => {
+            expect(() => new Veiculo(
+                1, null, "Civic", "ABC1234",
+                2024, "Preto", 85000
+            )).toThrow("ID do cliente inválido");
+        });
+
+        // CT-031
+        test("CT-031 - Cadastro de veículo com modelo vazio", () => {
+            expect(() => new Veiculo(
+                1, 1, "", "ABC1234", 2024, "Preto", 85000
+            )).toThrow("Modelo inválido");
+        });
+
+        // CT-032
+        test("CT-032 - Cadastro de veículo com modelo acima do limite", () => {
+            expect(() => new Veiculo(
+                1, 1, "M".repeat(61), "ABC1234",
+                2024, "Preto", 85000
+            )).toThrow("Modelo inválido");
+        });
+
+        // CT-033
+        test("CT-033 - Cadastro de veículo com placa curta", () => {
+            expect(() => new Veiculo(
+                1, 1, "Civic", "AB12", 2024, "Preto", 85000
+            )).toThrow("Placa inválida");
+        });
+
+        // CT-034
+        test("CT-034 - Cadastro de veículo com placa acima do limite", () => {
+            expect(() => new Veiculo(
+                1, 1, "Civic", "ABC12345678",
+                2024, "Preto", 85000
+            )).toThrow("Placa inválida");
+        });
+
+        // CT-035
+        test("CT-035 - Cadastro de veículo com ano anterior a 1886", () => {
+            expect(() => new Veiculo(
+                1, 1, "Civic", "ABC1234", 1885, "Preto", 85000
+            )).toThrow("Ano inválido");
+        });
+
+        // CT-036
+        test("CT-036 - Cadastro de veículo com cor vazia", () => {
+            expect(() => new Veiculo(
+                1, 1, "Civic", "ABC1234", 2024, "", 85000
+            )).toThrow("Cor inválida");
+        });
+
+        // CT-037
+        test("CT-037 - Cadastro de veículo com cor acima do limite", () => {
+            expect(() => new Veiculo(
+                1, 1, "Civic", "ABC1234",
+                2024, "C".repeat(31), 85000
+            )).toThrow("Cor inválida");
+        });
+
+        // CT-038
+        test("CT-038 - Cadastro de veículo com valor zero", () => {
+            expect(() => new Veiculo(
+                1, 1, "Civic", "ABC1234",
+                2024, "Preto", 0
+            )).toThrow("Valor inválido");
+        });
+
+    });
+
+
     });
 
 });
